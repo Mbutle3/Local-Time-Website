@@ -1,27 +1,43 @@
 # LocalTimeApp
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+This project was created using the Angular CLI (version 17.3.17).
 
-## Development server
+## Development Server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Run `ng serve` to start the development server.  
+Once running, open your browser and navigate to `http://localhost:4200/`.  
+The application will automatically reload whenever changes are made to the source files.
 
-## Code scaffolding
+## Production Deployment
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+The live production version of the application is available at:  
+https://proud-moss-07876b90f.1.azurestaticapps.net
 
-## Build
+## Code Generation
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+You can generate new Angular components by running:
 
-## Running unit tests
+`ng generate component component-name`
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+The Angular CLI also supports generating other resources such as:
 
-## Running end-to-end tests
+`directive | pipe | service | class | guard | interface | enum | module`
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Building the Project
 
-## Further help
+Run `ng build` to compile the project.  
+The compiled build artifacts will be output to the `dist/` directory.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## Running Unit Tests
+
+Execute `ng test` to run unit tests using the Karma test runner.
+
+## Running End-to-End Tests
+
+Run `ng e2e` to execute end-to-end tests using a supported testing framework.  
+Note: You must first install and configure an end-to-end testing package before using this command.
+
+## Additional Help
+
+For more information about Angular CLI commands, run `ng help` or visit the official Angular CLI documentation:  
+https://angular.io/cli
