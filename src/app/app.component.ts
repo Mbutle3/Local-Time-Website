@@ -26,9 +26,7 @@ import { GlobeComponent } from './globe/globe.component';
           <div class="timezone">{{ timezone }}</div>
         </div>
         @if (selectedLat != null && selectedLng != null) {
-          <div class="globe-area">
-            <app-globe [lat]="selectedLat" [lng]="selectedLng"></app-globe>
-          </div>
+          <app-globe [lat]="selectedLat" [lng]="selectedLng"></app-globe>
         }
         <div class="controls">
           <div class="controls-row">
@@ -60,7 +58,8 @@ import { GlobeComponent } from './globe/globe.component';
     .page {
       min-height: 100vh;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
     .bg {
       position: absolute;
@@ -283,25 +282,26 @@ import { GlobeComponent } from './globe/globe.component';
     .tz-option:hover {
       background: rgba(255, 255, 255, 0.15);
     }
-    .globe-area {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      margin: 1rem 0;
-      min-height: 280px;
-      flex-shrink: 0;
-    }
     app-globe {
       display: block;
       width: 100%;
       height: 100%;
       max-width: 260px;
       max-height: 260px;
+      margin: 1rem 0;
+      flex-shrink: 0;
+      min-height: 280px;
       text-align: center;
       vertical-align: middle;
       border-radius: 0.5rem;
-      overflow: hidden;
+      overflow: visible;
+    }
+    @media (min-height: 1200px) {
+      app-globe {
+        min-height: 38vh;
+        max-width: 320px;
+        max-height: 320px;
+      }
     }
   `],
 })

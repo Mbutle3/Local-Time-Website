@@ -21,6 +21,7 @@ import Globe, { type GlobeInstance } from 'globe.gl';
         justify-content: center;
         width: 100%;
         height: 100%;
+        overflow: visible;
         text-align: center;
         vertical-align: middle;
       }
@@ -30,9 +31,6 @@ import Globe, { type GlobeInstance } from 'globe.gl';
       }
       :host ::ng-deep div {
         text-align: center;
-        vertical-align: middle;
-      }
-      :host ::ng-deep .scene-container {
         vertical-align: middle;
       }
     `,
@@ -84,6 +82,19 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
       .pointAltitude(0);
 
     this.updatePoint();
+
+    // Move canvas to clock-container (before app-globe) so it renders in the desired DOM order
+    setTimeout(() => this.moveCanvasToClockContainer(el), 0);
+  }
+
+  private moveCanvasToClockContainer(host: HTMLElement): void {
+    const canvas = host.querySelector('canvas');
+    const clockContainer = host.closest('.clock-container');
+    if (canvas && clockContainer) {
+      clockContainer.insertBefore(canvas, host);
+      const sceneContainer = host.querySelector('.scene-container');
+      if (sceneContainer) sceneContainer.remove();
+    }
   }
 
   ngOnChanges(): void {
