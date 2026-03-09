@@ -24,33 +24,33 @@ import { GlobeComponent } from './globe/globe.component';
           </div>
           <div class="date">{{ currentDate }}</div>
           <div class="timezone">{{ timezone }}</div>
+          <div class="controls">
+            <div class="controls-row">
+              <button type="button" class="format-btn" (click)="toggleFormat()" [class.format-btn--active]="!use24Hour">
+                {{ use24Hour ? '12‑hour' : '24‑hour' }}
+              </button>
+              <button type="button" class="tz-btn" (click)="toggleTzPanel()" [class.tz-btn--open]="tzPanelOpen" title="Select time zone">
+                <span class="tz-btn-icon">🌐</span>
+                <span class="tz-btn-label">{{ timezoneLabel }}</span>
+              </button>
+            </div>
+            @if (tzPanelOpen) {
+              <div class="tz-panel">
+                <button type="button" class="tz-option" (click)="selectTimezone(null)">
+                  Local
+                </button>
+                @for (opt of timezoneOptions; track opt.tz) {
+                  <button type="button" class="tz-option" (click)="selectTimezone(opt.tz)">
+                    {{ opt.label }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
         </div>
         @if (selectedLat != null && selectedLng != null) {
           <app-globe [lat]="selectedLat" [lng]="selectedLng"></app-globe>
         }
-        <div class="controls">
-          <div class="controls-row">
-            <button type="button" class="format-btn" (click)="toggleFormat()" [class.format-btn--active]="!use24Hour">
-              {{ use24Hour ? '12‑hour' : '24‑hour' }}
-            </button>
-            <button type="button" class="tz-btn" (click)="toggleTzPanel()" [class.tz-btn--open]="tzPanelOpen" title="Select time zone">
-              <span class="tz-btn-icon">🌐</span>
-              <span class="tz-btn-label">{{ timezoneLabel }}</span>
-            </button>
-          </div>
-          @if (tzPanelOpen) {
-            <div class="tz-panel">
-              <button type="button" class="tz-option" (click)="selectTimezone(null)">
-                Local
-              </button>
-              @for (opt of timezoneOptions; track opt.tz) {
-                <button type="button" class="tz-option" (click)="selectTimezone(opt.tz)">
-                  {{ opt.label }}
-                </button>
-              }
-            </div>
-          }
-        </div>
       </div>
     </div>
   `,
