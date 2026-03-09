@@ -59,7 +59,7 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (!el) return;
 
     // Wait for host to have dimensions (it's inside an *ngIf that just mounted)
-    setTimeout(() => this.initGlobe(el as HTMLDivElement), 0);
+    setTimeout(() => this.initGlobe(el as HTMLDivElement), 100);
   }
 
   private getAssetUrl(path: string): string {
@@ -89,8 +89,8 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
       .pointLng('lng')
       .pointLabel('name')
       .pointColor((d: object) => this.getPointColor(d as { lat: number; lng: number; name: string }))
-      .pointRadius(0.4)
-      .pointAltitude(0)
+      .pointRadius(0.5)
+      .pointAltitude(0.015)
       .onPointClick((point: object) => {
         const p = point as { lat: number; lng: number; name: string };
         if (p && typeof p.lat === 'number' && typeof p.lng === 'number' && typeof p.name === 'string') {
@@ -118,7 +118,11 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
       .catch(() => {});
 
     // Move canvas to clock-container (before app-globe) so it renders in the desired DOM order
-    setTimeout(() => this.moveCanvasToClockContainer(el), 0);
+    setTimeout(() => {
+      this.moveCanvasToClockContainer(el);
+      // Re-apply points after DOM move so pins render (globe may need a tick to size correctly)
+      setTimeout(() => this.updatePoint(), 50);
+    }, 0);
   }
 
   private moveCanvasToClockContainer(host: HTMLElement): void {
@@ -126,6 +130,10 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
     const clockContainer = host.closest('.clock-container');
     if (canvas && clockContainer) {
       clockContainer.insertBefore(canvas, host);
+      // Keep canvas CSS size so it still displays after move (host will be hidden)
+      const w = canvas.getBoundingClientRect().width || 260;
+      const h = canvas.getBoundingClientRect().height || 280;
+      canvas.setAttribute('style', `width:${w}px;height:${h}px;display:block;`);
       // Remove all remaining content from host (wrapper divs), keep only the canvas in DOM
       while (host.firstChild) {
         host.removeChild(host.firstChild);
