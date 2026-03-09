@@ -92,8 +92,12 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
     const clockContainer = host.closest('.clock-container');
     if (canvas && clockContainer) {
       clockContainer.insertBefore(canvas, host);
-      const sceneContainer = host.querySelector('.scene-container');
-      if (sceneContainer) sceneContainer.remove();
+      // Remove all remaining content from host (wrapper divs), keep only the canvas in DOM
+      while (host.firstChild) {
+        host.removeChild(host.firstChild);
+      }
+      // Collapse host so only the canvas is visible in layout
+      host.style.display = 'none';
     }
   }
 
