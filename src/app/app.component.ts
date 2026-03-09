@@ -25,6 +25,11 @@ import { GlobeComponent } from './globe/globe.component';
           <div class="date">{{ currentDate }}</div>
           <div class="timezone">{{ timezone }}</div>
         </div>
+        @if (selectedLat != null && selectedLng != null) {
+          <div class="globe-area">
+            <app-globe [lat]="selectedLat" [lng]="selectedLng"></app-globe>
+          </div>
+        }
         <div class="controls">
           <div class="controls-row">
             <button type="button" class="format-btn" (click)="toggleFormat()" [class.format-btn--active]="!use24Hour">
@@ -48,11 +53,6 @@ import { GlobeComponent } from './globe/globe.component';
             </div>
           }
         </div>
-        @if (selectedLat != null && selectedLng != null) {
-          <div class="globe-wrapper">
-            <app-globe [lat]="selectedLat" [lng]="selectedLng"></app-globe>
-          </div>
-        }
       </div>
     </div>
   `,
@@ -149,6 +149,7 @@ import { GlobeComponent } from './globe/globe.component';
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      padding: 2rem 1rem;
       margin: 0;
       font-family: 'Segoe UI', system-ui, sans-serif;
     }
@@ -157,7 +158,9 @@ import { GlobeComponent } from './globe/globe.component';
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       color: #f5f5f5;
-      padding: 2rem 3rem;
+      padding: 2.25rem 3.5rem;
+      min-width: 320px;
+      max-width: 420px;
       border-radius: 1rem;
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.4);
@@ -280,15 +283,25 @@ import { GlobeComponent } from './globe/globe.component';
     .tz-option:hover {
       background: rgba(255, 255, 255, 0.15);
     }
-    .globe-wrapper {
-      margin-top: 1.5rem;
+    .globe-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
-      max-width: 320px;
-      height: 240px;
-      border-radius: 0.75rem;
+      margin: 1rem 0;
+      min-height: 280px;
+      flex-shrink: 0;
+    }
+    app-globe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: 260px;
+      max-height: 260px;
+      text-align: center;
+      vertical-align: middle;
+      border-radius: 0.5rem;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.3);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
   `],
 })

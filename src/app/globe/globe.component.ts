@@ -4,27 +4,42 @@ import {
   OnChanges,
   OnDestroy,
   AfterViewInit,
-  ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
 import Globe, { type GlobeInstance } from 'globe.gl';
 
 @Component({
   selector: 'app-globe',
   standalone: true,
-  template: `<div #container class="globe-container"></div>`,
+  template: ``,
   styles: [
     `
-      .globe-container {
+      :host {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
         height: 100%;
-        min-height: 200px;
+        text-align: center;
+        vertical-align: middle;
+      }
+      :host ::ng-deep canvas {
+        text-align: center;
+        vertical-align: middle;
+      }
+      :host ::ng-deep div {
+        text-align: center;
+        vertical-align: middle;
+      }
+      :host ::ng-deep .scene-container {
+        vertical-align: middle;
       }
     `,
   ],
 })
 export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
-  @ViewChild('container', { static: false }) containerRef!: ElementRef<HTMLDivElement>;
+  private elementRef = inject(ElementRef<HTMLElement>);
 
   @Input() lat: number | null = null;
   @Input() lng: number | null = null;
@@ -32,22 +47,28 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
   private globe: GlobeInstance | null = null;
 
   ngAfterViewInit(): void {
-    const el = this.containerRef?.nativeElement;
+    const el = this.elementRef.nativeElement;
     if (!el) return;
 
-    // Wait for container to have dimensions (it's inside an *ngIf that just mounted)
-    setTimeout(() => this.initGlobe(el), 0);
+    // Wait for host to have dimensions (it's inside an *ngIf that just mounted)
+    setTimeout(() => this.initGlobe(el as HTMLDivElement), 0);
+  }
+
+  private getAssetUrl(path: string): string {
+    const base = document.querySelector('base')?.getAttribute('href') || '/';
+    const baseUrl = new URL(base, window.location.origin);
+    return new URL(path.replace(/^\//, ''), baseUrl.origin + baseUrl.pathname).href;
   }
 
   private initGlobe(el: HTMLDivElement): void {
     if (this.globe) return;
 
-    // Use local assets so the globe texture always loads (no CDN/CORS issues)
-    const earthImg = 'assets/globe/earth-blue-marble.jpg';
-    const bumpImg = 'assets/globe/earth-topology.png';
+    // Use full absolute URLs so Three.js TextureLoader can load textures in any context
+    const earthImg = this.getAssetUrl('/assets/globe/earth-blue-marble.jpg');
+    const bumpImg = this.getAssetUrl('/assets/globe/earth-topology.png');
 
     this.globe = new Globe(el)
-      .backgroundColor('transparent')
+      .backgroundColor('rgba(0, 0, 0, 0)')
       .showAtmosphere(true)
       .atmosphereColor('#ffffff')
       .atmosphereAltitude(0.15)
