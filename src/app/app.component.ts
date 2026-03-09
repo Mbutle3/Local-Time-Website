@@ -59,7 +59,7 @@ import { GlobeComponent } from './globe/globe.component';
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
-      overflow-y: auto;
+      overflow-y: scroll;
     }
     .bg {
       position: absolute;
