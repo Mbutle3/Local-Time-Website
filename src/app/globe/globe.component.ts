@@ -1,11 +1,13 @@
 import {
   Component,
+  EventEmitter,
   Input,
   OnChanges,
   OnDestroy,
   AfterViewInit,
   ElementRef,
   inject,
+  Output,
 } from '@angular/core';
 import Globe, { type GlobeInstance } from 'globe.gl';
 
@@ -41,6 +43,14 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   @Input() lat: number | null = null;
   @Input() lng: number | null = null;
+  /** Notable cities to show as markers (same timezone). */
+  @Input() cities: { lat: number; lng: number; name: string }[] = [];
+
+  /** Currently selected city (yellow pin); others are white. */
+  @Input() selectedCity: { lat: number; lng: number; name: string } | null = null;
+
+  /** Emits the clicked city so the app can show time in that region. */
+  @Output() cityClick = new EventEmitter<{ lat: number; lng: number; name: string }>();
 
   private globe: GlobeInstance | null = null;
 
@@ -72,16 +82,40 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
       .atmosphereAltitude(0.15)
       .globeImageUrl(earthImg)
       .bumpImageUrl(bumpImg)
-      .showGraticules(false)
+      .showGraticules(true)
       .pointOfView({ lat: 0, lng: 0, altitude: 2.2 })
       .pointsData([])
       .pointLat('lat')
       .pointLng('lng')
-      .pointColor(() => '#63b3ed')
+      .pointLabel('name')
+      .pointColor((d: object) => this.getPointColor(d as { lat: number; lng: number; name: string }))
       .pointRadius(0.4)
-      .pointAltitude(0);
+      .pointAltitude(0)
+      .onPointClick((point: object) => {
+        const p = point as { lat: number; lng: number; name: string };
+        if (p && typeof p.lat === 'number' && typeof p.lng === 'number' && typeof p.name === 'string') {
+          this.cityClick.emit(p);
+        }
+      });
 
     this.updatePoint();
+
+    // Country border lines (stroke-only polygons from Natural Earth GeoJSON)
+    const countriesUrl = this.getAssetUrl('/assets/globe/ne_110m_admin_0_countries.geojson');
+    fetch(countriesUrl)
+      .then((res) => res.json())
+      .then((geojson: { features?: Array<{ geometry: unknown; properties?: Record<string, unknown> }> }) => {
+        if (!this.globe) return;
+        const features = geojson.features?.filter((f) => f.properties?.['ISO_A2'] !== 'AQ') ?? [];
+        this.globe
+          .polygonsData(features)
+          .polygonCapColor(() => 'rgba(0,0,0,0)')
+          .polygonSideColor(() => 'rgba(0,0,0,0)')
+          .polygonStrokeColor(() => 'rgba(255,255,255,0.35)')
+          .polygonAltitude(0)
+          .polygonsTransitionDuration(0);
+      })
+      .catch(() => {});
 
     // Move canvas to clock-container (before app-globe) so it renders in the desired DOM order
     setTimeout(() => this.moveCanvasToClockContainer(el), 0);
@@ -105,17 +139,28 @@ export class GlobeComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.updatePoint();
   }
 
+  private getPointColor(d: { lat: number; lng: number; name: string }): string {
+    const s = this.selectedCity;
+    if (s && s.lat === d.lat && s.lng === d.lng && s.name === d.name) return '#eab308'; // yellow (selected)
+    return '#ffffff'; // white (selectable)
+  }
+
   private updatePoint(): void {
     if (!this.globe) return;
 
     const hasLocation =
       this.lat != null && this.lng != null && !Number.isNaN(this.lat) && !Number.isNaN(this.lng);
+    const focusLat = hasLocation ? Number(this.lat) : 0;
+    const focusLng = hasLocation ? Number(this.lng) : 0;
 
-    if (hasLocation) {
-      const lat = Number(this.lat);
-      const lng = Number(this.lng);
-      this.globe.pointsData([{ lat, lng }]);
-      this.globe.pointOfView({ lat, lng, altitude: 2.2 }, 800);
+    if (this.cities.length > 0) {
+      this.globe
+        .pointsData(this.cities)
+        .pointColor((d: object) => this.getPointColor(d as { lat: number; lng: number; name: string }));
+      this.globe.pointOfView({ lat: focusLat, lng: focusLng, altitude: 2.2 }, 800);
+    } else if (hasLocation) {
+      this.globe.pointsData([{ lat: focusLat, lng: focusLng, name: '' }]);
+      this.globe.pointOfView({ lat: focusLat, lng: focusLng, altitude: 2.2 }, 800);
     } else {
       this.globe.pointsData([]);
       this.globe.pointOfView({ lat: 0, lng: 0, altitude: 2.2 }, 800);
